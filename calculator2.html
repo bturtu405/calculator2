@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="heb" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Calculator2</title>
+</head>
+
+<body>
+  <div id="calculator">
+    <h1 dir="ltr" id="calculatorInput"></h1>
+    <div class="calculator-buttons">
+      <input type="button" value="7" onclick="getClickedButtonId(this.id)" id="seven" />
+      <input type="button" value="8" onclick="getClickedButtonId(this.id)" id="eight" />
+      <input type="button" value="9" onclick="getClickedButtonId(this.id)" id="nine" />
+      <input type="button" value=&larr; onclick="getClickedButtonId(this.id)" id="backspace">
+      <input type="button" value="c" onclick="getClickedButtonId(this.id)" id="clear" />
+      <input type="button" value="4" onclick="getClickedButtonId(this.id)" id="four" />
+      <input type="button" value="5" onclick="getClickedButtonId(this.id)" id="five" />
+      <input type="button" value="6" onclick="getClickedButtonId(this.id)" id="six" />
+      <input type="button" value="+" onclick="getClickedButtonId(this.id)" id="plus" />
+      <input type="button" value="-" onclick="getClickedButtonId(this.id)" id="minus" />
+      <input type="button" value="1" onclick="getClickedButtonId(this.id)" id="one" />
+      <input type="button" value="2" onclick="getClickedButtonId(this.id)" id="two" />
+      <input type="button" value="3" onclick="getClickedButtonId(this.id)" id="three">
+      <input type="button" value="*" onclick="getClickedButtonId(this.id)" id="multiply" />
+      <input type="button" value="/" onclick="getClickedButtonId(this.id)" id="divide" />
+      <input type="button" class="big-button" value="=" onclick="getClickedButtonId(this.id)" id="equal" />
+      <input type="button" value="." onclick="getClickedButtonId(this.id)" id="dot" />
+      <input type="button" class="big-button" value="0" onclick="getClickedButtonId(this.id)" id="zero">
+    </div>
+  </div>
+  <script type="text/javascript" src="calculator2.js">
+  </script>
+</body>
+
+</html>
