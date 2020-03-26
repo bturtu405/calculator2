@@ -70,38 +70,38 @@
       }
 
       let writeNumbers = (key) => {
-        numberInput = CALCULATOR_INPUT.innerHTML;
-        setAllIndexesOfOperators(numberInput);
+        equationInput = CALCULATOR_INPUT.innerHTML;
+        setAllIndexesOfOperators(equationInput);
         let lastIndexOfOperator = operatorAppearances[operatorAppearances.length - 1];
-        let firstDigitOfNumber = numberInput.charAt(lastIndexOfOperator + 1);
+        let firstDigitOfNumber = equationInput.charAt(lastIndexOfOperator + 1);
 
-        if (numberInput === CALCULATOR_BUTTONS['zero']) {
+        if (equationInput === CALCULATOR_BUTTONS['zero']) {
           backspace();
         } else if (firstDigitOfNumber === CALCULATOR_BUTTONS['zero'] && lastIndexOfOperator > 0 &&
-          lastIndexOfOperator === numberInput.length - 2) {
+          lastIndexOfOperator === equationInput.length - 2) {
           backspace();
         }
         CALCULATOR_INPUT.innerHTML += key;
       }
 
       let writeDot = () => {
-        let numberInput = CALCULATOR_INPUT.innerHTML;
-        setAllIndexesOfOperators(numberInput);
+        let equationInput = CALCULATOR_INPUT.innerHTML;
+        setAllIndexesOfOperators(equationInput);
         let lastIndexOfOperator = operatorAppearances[operatorAppearances.length - 1];
-        if (!numberInput) {
+        if (!equationInput) {
           CALCULATOR_INPUT.innerHTML = CALCULATOR_BUTTONS['zero'] + CALCULATOR_BUTTONS['dot'];
-        } else if (CALCULATOR_OPERATOR_SIGNS.includes(numberInput.charAt(numberInput.length - 1))) {
+        } else if (CALCULATOR_OPERATOR_SIGNS.includes(equationInput.charAt(equationInput.length - 1))) {
           CALCULATOR_INPUT.innerHTML += CALCULATOR_BUTTONS['zero'] + CALCULATOR_BUTTONS['dot'];
-        } else if (!numberInput.slice(lastIndexOfOperator,
-            numberInput.length).includes(CALCULATOR_BUTTONS['dot'])) {
+        } else if (!equationInput.slice(lastIndexOfOperator,
+            equationInput.length).includes(CALCULATOR_BUTTONS['dot'])) {
           CALCULATOR_INPUT.innerHTML += CALCULATOR_BUTTONS['dot'];
         }
       }
 
       let writeOperator = (key) => {
-        let numberInput = CALCULATOR_INPUT.innerHTML;
-        let lastCharacter = numberInput.charAt(numberInput.length - 1);
-        if (!numberInput) {
+        let equationInput = CALCULATOR_INPUT.innerHTML;
+        let lastCharacter = equationInput.charAt(equationInput.length - 1);
+        if (!equationInput) {
           CALCULATOR_INPUT.innerHTML = CALCULATOR_BUTTONS['zero'] + key;
         } else {
           if (lastCharacter === CALCULATOR_BUTTONS['dot'] ||
@@ -124,21 +124,21 @@
         CALCULATOR_FUNCTIONS[key]();
       }
 
-      let setAllIndexesOfOperators = (input) => {
+      let setAllIndexesOfOperators = (equationInput) => {
         while (operatorAppearances.length !== 1) {
           operatorAppearances.pop();
         }
-        for (var i = 1; i < input.length; i++) {
-          if (CALCULATOR_OPERATOR_SIGNS.includes(input.charAt(i))) {
+        for (var i = 1; i < equationInput.length; i++) {
+          if (CALCULATOR_OPERATOR_SIGNS.includes(equationInput.charAt(i))) {
             operatorAppearances.push(i);
           }
         }
       };
 
       let equal = () => {
-          let input = CALCULATOR_INPUT.innerHTML;
-          let lastCharacter = input.charAt(input.length - 1);
-          if (!input) {
+          let equationInput = CALCULATOR_INPUT.innerHTML;
+          let lastCharacter = equationInput.charAt(equationInput.length - 1);
+          if (!equationInput) {
             CALCULATOR_INPUT.innerHTML = CALCULATOR_BUTTONS['zero'];
           } else {
             if (lastCharacter.match(/[0-9]/) === null) {
@@ -160,32 +160,32 @@
       }
 
       let getResult = () => {
-        let input = CALCULATOR_INPUT.innerHTML;
+        let equationInput = CALCULATOR_INPUT.innerHTML;
         let operatorIndex;
         let equation;
         let result;
         let hasMultiplyOrDivideSigns;
-        setAllIndexesOfOperators(input);
+        setAllIndexesOfOperators(equationInput);
         for (let i = 1; i < operatorAppearances.length; i++) {
           operatorIndex = operatorAppearances[i];
-          equation = getTheEquationBetweenOperators(operatorIndex, input, i);
-          hasMultiplyOrDivideSigns = (input.includes(CALCULATOR_BUTTONS['multiply']) ||
-            (input.includes(CALCULATOR_BUTTONS['divide'])));
-          if (input[operatorIndex] === CALCULATOR_BUTTONS['divide'] ||
-            input[operatorIndex] === CALCULATOR_BUTTONS['multiply']) {
-            result = calculateMultiplyAndDivide(equation, input[operatorIndex]);
+          equation = getTheEquationBetweenOperators(equationInput, i);
+          hasMultiplyOrDivideSigns = (equationInput.includes(CALCULATOR_BUTTONS['multiply']) ||
+            (equationInput.includes(CALCULATOR_BUTTONS['divide'])));
+          if (equationInput[operatorIndex] === CALCULATOR_BUTTONS['divide'] ||
+            equationInput[operatorIndex] === CALCULATOR_BUTTONS['multiply']) {
+            result = calculateMultiplyAndDivide(equation, equationInput[operatorIndex]);
             i = 0;
-            input = input.replace(equation, result);
-            setAllIndexesOfOperators(input);
+            equationInput = equationInput.replace(equation, result);
+            setAllIndexesOfOperators(equationInput);
           } else if (!hasMultiplyOrDivideSigns) {
-            result = calculate(equation, input[operatorIndex]);
+            result = calculate(equation, equationInput[operatorIndex]);
             i = 0;
-            input = input.replace(equation, result);
-            setAllIndexesOfOperators(input);
+            equationInput = equationInput.replace(equation, result);
+            setAllIndexesOfOperators(equationInput);
           }
 
         }
-        return input;
+        return equationInput;
       }
 
       let calculateMultiplyAndDivide = (equation, operator) => {
@@ -197,13 +197,13 @@
         }
       }
 
-      let getTheEquationBetweenOperators = (operatorIndex, input, i) => {
-        if (i === 1) {
-          return (i < operatorAppearances.length - 1) ? input.slice(0, operatorAppearances[2]) :
-            input.slice(0, input.length);
+      let getTheEquationBetweenOperators = (equationInput, index) => {
+        if (index === 1) {
+          return (index < operatorAppearances.length - 1) ? equationInput.slice(0, operatorAppearances[2])
+           : equationInput.slice(0, equationInput.length);
         } else {
-          return (i < operatorAppearances.length - 1) ? input.slice(operatorAppearances[i - 1] + 1, operatorAppearances[i + 1]) :
-            input.slice(operatorAppearances[i - 1] + 1, input.length);
+          return (index < operatorAppearances.length - 1) ? equationInput.slice(operatorAppearances[index - 1] + 1, operatorAppearances[index + 1])
+          : equationInput.slice(operatorAppearances[index - 1] + 1, equationInput.length);
         }
       }
 
