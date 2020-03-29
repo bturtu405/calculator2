@@ -29,18 +29,23 @@
       const CALCULATOR_ACTIONS_SIGNS = [CALCULATOR_BUTTONS.equal, CALCULATOR_BUTTONS.clear,
         CALCULATOR_BUTTONS.backspace, 'Enter'
       ];
+      const MATH_OPERATOR = {
+        '+': (firstNumber,secondNumber) => {return firstNumber + secondNumber;},
+        '-': (firstNumber,secondNumber) => {return firstNumber - secondNumber;},
+        '*': (firstNumber,secondNumber) => {return firstNumber * secondNumber;},
+        '/': (firstNumber,secondNumber) => {return firstNumber / secondNumber;}
+      };
       let isNewEquation = true;
       let indexesOfOperators = [];
       CALCULATOR_INPUT.innerHTML = '';
 
-      const clickedOnButton = (buttonId) => {
+      const invokeClickedButton = (buttonId) => {
         let button = document.getElementById(buttonId);
-        button.setAttribute('disabled', true);
-        button.removeAttribute('disabled');
+        button.blur();
         keySorter(CALCULATOR_BUTTONS[buttonId]);
       }
 
-      document.addEventListener('keydown', ({ key }) => { keySorter(key); });
+      document.addEventListener('keydown', ({ key }) => keySorter(key));
 
       const keySorter = (key) => {
         if (CALCULATOR_ACTIONS_SIGNS.includes(key)) {
@@ -55,7 +60,7 @@
       }
 
       const writeInTextbox = (key) => {
-        checkForMinusInTheFirstIndex();
+        addZeroAtTheBeginningBeforeMinusSign();
 
         if (key.match(/[0-9]/) !== null && key.length === 1) {
           writeNumbers(key);
@@ -73,12 +78,12 @@
       const writeNumbers = (key) => {
         equationInput = CALCULATOR_INPUT.innerHTML;
         setIndexesOfOperators(equationInput);
-        let lastIndexOfOperator = indexesOfOperators[indexesOfOperators.length - 1];
-        let firstDigitOfNumber = equationInput.charAt(lastIndexOfOperator + 1);
+        const LAST_INDEX_OF_OPERATOR = indexesOfOperators[indexesOfOperators.length - 1];
+        const FIRST_DIGIT_OF_NUMBER = equationInput.charAt(LAST_INDEX_OF_OPERATOR + 1);
         if (equationInput === CALCULATOR_BUTTONS.zero) {
           backspace();
-        } else if (firstDigitOfNumber === CALCULATOR_BUTTONS.zero && lastIndexOfOperator > 0
-          && lastIndexOfOperator === equationInput.length - 2) {
+        } else if (FIRST_DIGIT_OF_NUMBER === CALCULATOR_BUTTONS.zero && LAST_INDEX_OF_OPERATOR > 0
+          && LAST_INDEX_OF_OPERATOR === equationInput.length - 2) {
           backspace();
         }
         CALCULATOR_INPUT.innerHTML += key;
@@ -135,18 +140,13 @@
         } else {
           lastCharacterValid(lastCharacter);
           let result = Number(getResult());
-          let isValidResult = validResult(result);
-          if (!isValidResult) {
+          if (!validateResult(result)) {
             mathError();
           } else {
-            if (result.toString().length < MAX_CHARACTERS_INPUT) {
               CALCULATOR_INPUT.innerHTML = result;
-            } else {
-              mathError();
             }
           }
         }
-      }
 
       const getResult = () => {
         let equationInput = CALCULATOR_INPUT.innerHTML;
@@ -176,13 +176,14 @@
       }
 
       const getTheEquationBetweenOperators = (equationInput, index) => {
-        if (index === 0) {
-          return (index < indexesOfOperators.length - 1) ? equationInput.slice(0, indexesOfOperators[1]) :
-            equationInput;
-        } else {
-          return (index < indexesOfOperators.length - 1) ? equationInput.slice(indexesOfOperators[index - 1] + 1, indexesOfOperators[index + 1]) :
-            equationInput.slice(indexesOfOperators[index - 1] + 1, equationInput.length);
+        if (!index) {
+          return (index < indexesOfOperators.length - 1)
+          ? equationInput.slice(0, indexesOfOperators[1])
+          : equationInput;
         }
+          return (index < indexesOfOperators.length - 1)
+          ? equationInput.slice(indexesOfOperators[index - 1] + 1, indexesOfOperators[index + 1])
+          : equationInput.slice(indexesOfOperators[index - 1] + 1, equationInput.length);
       }
 
       const backspace = () => {
@@ -195,6 +196,13 @@
         CALCULATOR_INPUT.innerHTML = '';
         isNewEquation = true;
       }
+
+      const CALCULATOR_ACTIONS = {
+        'Backspace': backspace,
+        'c': clear,
+        '=': equal,
+        'Enter': equal
+      };
 
       const flipCalculator = () => {
         CALCULATOR.classList.add('rotated');
@@ -214,18 +222,12 @@
       }
 
       const calculate = (equation, operator) => {
-        let firstNumber = Number(equation.split(operator)[0]);
-        let secondNumber = Number(equation.split(operator)[1]);
+        let firstNumber = splitEquation(equation,operator)[0];
+        let secondNumber = splitEquation(equation,operator)[1];
         let timesMultipliedBy10 = multiplyTimes10ByNumberAfterDot(firstNumber, secondNumber);
         firstNumber *= Math.pow(10, timesMultipliedBy10);
         secondNumber *= Math.pow(10, timesMultipliedBy10);
-        const MATH_OPERATOR = {
-          '+': () => {return firstNumber + secondNumber;},
-          '-': () => {return firstNumber - secondNumber;},
-          '*': () => {return firstNumber * secondNumber;},
-          '/': () => {return firstNumber / secondNumber;}
-        };
-        let result = MATH_OPERATOR[operator]();
+        let result = MATH_OPERATOR[operator](firstNumber,secondNumber);
         if (operator === CALCULATOR_BUTTONS.multiply) {
           return divdeResult(result, timesMultipliedBy10 * 2);
         } else if (operator === CALCULATOR_BUTTONS.divide) {
@@ -243,37 +245,39 @@
       }
 
       const multiplyTimes10ByNumberAfterDot = (firstNumber, secondNumber) => {
+        let firstNumberHasDot = firstNumber.toString().includes(CALCULATOR_BUTTONS.dot);
+        let secondNumberHasDot = secondNumber.toString().includes(CALCULATOR_BUTTONS.dot);
         let firstNumberNumbersAfterdot = firstNumber.toString().split(CALCULATOR_BUTTONS.dot)[1];
         let secondNumberNumbersAfterdot = secondNumber.toString().split(CALCULATOR_BUTTONS.dot)[1];
-        return firstNumberNumbersAfterdot !== undefined && secondNumberNumbersAfterdot !== undefined ? Math.max(firstNumberNumbersAfterdot.length, secondNumberNumbersAfterdot.length) :
-          firstNumberNumbersAfterdot !== undefined ? firstNumberNumbersAfterdot.length :
-          secondNumberNumbersAfterdot !== undefined ? secondNumberNumbersAfterdot.length :
-          0;
+        return firstNumberHasDot && secondNumberHasDot
+        ? Math.max(firstNumberNumbersAfterdot.length, secondNumberNumbersAfterdot.length)
+        : firstNumberHasDot ? firstNumberNumbersAfterdot.length
+        : secondNumberHasDot ? secondNumberNumbersAfterdot.length
+        : 0;
       }
 
-      const CALCULATOR_ACTIONS = {
-        'Backspace': backspace,
-        'c': clear,
-        '=': equal,
-        'Enter': equal
-      };
-
-
-      const checkForMinusInTheFirstIndex = () => {
+      const addZeroAtTheBeginningBeforeMinusSign = () => {
         if (CALCULATOR_INPUT.innerHTML[0] === CALCULATOR_BUTTONS.minus) {
           CALCULATOR_INPUT.innerHTML = CALCULATOR_BUTTONS.zero + CALCULATOR_INPUT.innerHTML;
         }
       }
 
-      const validResult = (result) => {
+      const validateResult = (result) => {
         return (result.toString().length < MAX_CHARACTERS_FOR_INT
         || result.toString().includes(CALCULATOR_BUTTONS.dot))
         && !result.toString().includes(NaN)
-        && !result.toString().includes('e');
+        && !result.toString().includes('e')
+        && result.toString().length <= MAX_CHARACTERS_INPUT;
       }
 
       const lastCharacterValid = (lastCharacter) => {
-        if (lastCharacter.match(/[0-9]/) === null) {
+        if (!lastCharacter.match(/[0-9]/)) {
           backspace();
         }
+      }
+
+      const splitEquation = (equation,operator) =>{
+        const EQUATION_WITHOUT_FIRST_CHARCTER = equation.slice(1,equation.length);
+        const TWO_NUMBERS = EQUATION_WITHOUT_FIRST_CHARCTER.split(operator);
+        return [Number(equation[0]+TWO_NUMBERS[0]),Number(TWO_NUMBERS[1])];
       }
